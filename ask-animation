@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You ❤️</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #030003;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: Georgia, serif;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Ekran boyutlarını ayarla
+        let W = canvas.width = window.innerWidth;
+        let H = canvas.height = window.innerHeight;
+
+        let frame = 0;
+        const heartPoints = [];
+
+        // Kalp formülü için noktaları oluşturma (Python'daki random.seed(12) mantığı)
+        // Sabit bir RNG simülasyonu için basit bir pseudo-random
+        function pseudoRandom(seed) {
+            let x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        }
+
+        let seedVal = 12;
+        function nextRandom() {
+            seedVal = (seedVal * 9301 + 49297) % 233280;
+            return seedVal / 233280;
+        }
+
+        for (let i = 0; i < 650; i++) {
+            let t = nextRandom() * 2 * Math.PI;
+            let r = Math.sqrt(nextRandom());
+            let x = 16 * Math.pow(Math.sin(t), 3) * r;
+            let y = (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t)) * r;
+            let size = Math.floor(nextRandom() * 5) + 7;
+            heartPoints.push({ x, y, size });
+        }
+
+        function animate() {
+            frame++;
+            ctx.fillStyle = "#030003";
+            ctx.fillRect(0, 0, W, H);
+
+            if (frame < 100) {
+                // Yazı görünme aşaması
+                let progress = Math.min(frame / 60, 1);
+                let size = Math.floor(20 + 18 * progress);
+
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                
+                ctx.fillStyle = "white";
+                ctx.font = `bold ${size}px Georgia`;
+                ctx.fillText("I LOVE YOU", W / 2, H / 2 - 20);
+
+                ctx.fillStyle = "#ff6688";
+                ctx.font = "italic 17px Georgia";
+                ctx.fillText("You are my everything ❤️", W / 2, H / 2 + 35);
+
+            } else if (frame < 145) {
+                // Yazı kaybolma aşaması
+                let progress = 1 - (frame - 100) / 45;
+                let size = Math.max(1, Math.floor(38 * progress));
+
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                ctx.fillStyle = "white";
+                ctx.font = `bold ${size}px Georgia`;
+                ctx.fillText("I LOVE YOU", W / 2, H / 2 - 20);
+
+            } else {
+                // Kalp çıkma aşaması
+                let pulse = 1 + 0.035 * Math.sin(frame * 0.065);
+                let scale = Math.min((frame - 145) / 90, 1) * 20 * pulse;
+
+                ctx.save();
+                ctx.translate(W / 2, H / 2);
+
+                heartPoints.forEach(p => {
+                    ctx.fillStyle = "#ff1744";
+                    ctx.font = `bold ${p.size}px Arial`;
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText("I love you", p.x * scale, p.y * scale * -1);
+                });
+
+                ctx.restore();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
