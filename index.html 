@@ -1,105 +1,83 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mehmet & Murat</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #050505;
-            overflow: hidden;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        canvas {
-            display: block;
-        }
-
-        .center-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 10;
-            color: #ffffff;
-            text-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
-            pointer-events: none;
-        }
-
-        h1 {
-            font-size: 2.8rem;
-            margin: 0;
-            background: linear-gradient(45deg, #ff758c, #ff7eb3, #758cff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        p {
-            font-size: 1.2rem;
-            color: #a0aec0;
-            margin-top: 10px;
-            letter-spacing: 2px;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="center-text">
-        <h1>sen benim minik kocişim canım bitsnem küçüğüm herşeyimsin</h1>
-        <p>∞seni seviyorum∞</p>
-    </div>
-
-    <canvas id="matrixCanvas"></canvas>
-
-    <script>
-        const canvas = document.getElementById('matrixCanvas');
-        const ctx = canvas.getContext('2d');
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        // Akacak karakterler (sayılar, isimler ve tuş simgeleri)
-        const characters = "0123456789MEHMETMURAT+-%*/<>[ ]{}#@!";
-        const fontSize = 16;
-        const columns = canvas.width / fontSize;
-
-        const drops = [];
-        for (let i = 0; i < columns; i++) {
-            drops[i] = 1;
-        }
-
-        function draw() {
-            // Arka planı hafif şeffaf siyah yaparak arkada iz kalmasını sağla (Matrix efekti)
-            ctx.fillStyle = 'rgba(5, 5, 5, 0.08)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = '#00ffcc'; // Akış rengi (Neon yeşil/mavi tonu)
-            ctx.font = fontSize + 'px monospace';
-
-            for (let i = 0; i < drops.length; i++) {
-                // Rastgele bir karakter seç
-                const text = characters.charAt(Math.floor(Math.random() * characters.length));
-                
-                // Aşağıya doğru yazdır
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-                // Ekranın altına ulaştıysa başa döndür
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
-            }
-        }
-
-        setInterval(draw, 33);
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
-    </script>
-</body>
-</html>
+import tkinter as tk
+import math
+import random
+W, H = 900, 700
+NAME = "I LOVE YOU"
+MESSAGE = "You are my everything ❤️"
+root = tk.Tk()
+root.title("For You ❤️")
+root.geometry(f"{W}x{H}")
+root.configure(bg="#030003")
+canvas = tk.Canvas(
+root, width=W, height=H,
+bg="#030003", highlightthickness=0
+)
+canvas.pack()
+frame = 0
+heart_items = []
+particles = []
+# Текст
+title = canvas.create_text(
+W/2, H/2,
+text="",
+fill="white",
+font=("Georgia", 38, "bold")
+)
+subtitle = canvas.create_text(
+W/2, H/2 + 55,
+text="",
+fill="#ff6688",
+font=("Georgia", 17, "italic")
+)
+# Сердце из надписей
+random.seed(12)
+for i in range(650):
+t = random.uniform(0, 2 * math.pi)
+r = math.sqrt(random.random())
+x = 16 * math.sin(t)**3 * r
+y = (
+13 * math.cos(t)
+- 5 * math.cos(2*t)
+- 2 * math.cos(3*t)
+- math.cos(4*t)
+) * r
+item = canvas.create_text(
+W/2, H/2,
+text="I love you",
+fill="#ff1744",
+font=("Arial", random.randint(7, 11), "bold"),
+state="hidden"
+)
+heart_items.append((item, x, y, random.random() * 6.28))
+def animate():
+global frame
+frame += 1
+# Сначала плавно появляется текст
+if frame < 100:
+progress = min(frame / 60, 1)
+canvas.itemconfig(title, text=NAME)
+canvas.itemconfig(subtitle, text=MESSAGE)
+size = int(20 + 18 * progress)
+canvas.itemconfig(
+title,
+font=("Georgia", size, "bold")
+)
+# Затем текст исчезает
+elif frame < 145:
+progress = 1 - (frame - 100) / 45
+canvas.itemconfig(title, fill="#ffffff")
+canvas.itemconfig(subtitle, fill="#ff6688")
+if frame == 101:
+canvas.itemconfig(subtitle, text="")
+# Плавное уменьшение
+size = max(1, int(38 * progress))
+canvas.itemconfig(
+title,
+font=("Georgia", size, "bold")
+)
+# Появляется сердце
+else:
+canvas.itemconfig(title, state="hidden")
+canvas.itemconfig(subtitle, state="hidden")
+reveal = min((frame - 145) / 90, 1)
+pulse = 1 + 0.035 * math.sin(frame * 0.065)
